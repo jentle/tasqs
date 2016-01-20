@@ -59,4 +59,5 @@ worker.run null
 ## Run in docker 
 ```
 docker pull jentle/tasqs
+docker run -t -i jentle/tasqs:0.10 ~/start-worker <accessKey> <secretId> [region]
 ```
