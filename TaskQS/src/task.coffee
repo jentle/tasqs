@@ -68,7 +68,7 @@ module.exports= class Task
     if not allowed_retries or allowed_retries <=0
       return true
 
-    if allowed_retries <= message.retry_num
+    if allowed_retries <= message.retryNum
       return true
 
     # Republish failed message if not permanent failed

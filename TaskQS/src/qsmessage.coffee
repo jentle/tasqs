@@ -3,7 +3,7 @@ Message = require './lib/message'
 crypt = require './crypt'
 config = require './config/config.json'
 {getTimestamp, getClassPath} = require './utils'
-
+logger = require './logger'
 
 module.exports = class QsMessage extends Message
 
@@ -12,10 +12,11 @@ module.exports = class QsMessage extends Message
     message_body =
       id: task_id,
       task_name:"#{getClassPath task_class.classPath}",
-      payload: payload,
-      _enqueued_time: getTimestamp null,
       _publisher_data: '',
-      retry_num : current_retry_num
+      retryNum : current_retry_num,
+      payload: payload,
+      _enqueued_time: getTimestamp null
+
 
     return new QsMessage queue, message_body
 
@@ -32,12 +33,14 @@ module.exports = class QsMessage extends Message
     self = @
     zlib.unzip buf, (err, buffer) ->
       if not err
+
         message_body = JSON.parse buffer.toString()
+
         self.set_body message_body
         self.args = message_body.payload.args
         self.payload = message_body.payload
         self.taskId = message_body.id
-        self.retryNum  = message_body.retryNum
+        self.retryNum  = message_body.retryNum | 0
 
         cb message_body
     @

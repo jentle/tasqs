@@ -134,7 +134,7 @@ module.exports = class Worker extends events.EventEmitter
 
 
   _onError: (e)->
-    logger.error  e
+    logger.error  e.message
 
 
 

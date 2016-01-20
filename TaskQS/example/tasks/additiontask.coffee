@@ -5,4 +5,4 @@ module.exports = class AdditionTask extends Task
   @classPath : __filename
 
   _runTask:( a, b) ->
-    throw new Error "Addition erro #{a+b}"
+    console.log "Addition result #{a+b}"
