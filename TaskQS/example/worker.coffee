@@ -1,4 +1,4 @@
-Worker = require '..src/worker'
+Worker = require '../src/worker'
 
 worker = new Worker
 worker.run()

@@ -8,6 +8,7 @@ QueueLoader = require './queueloader'
 Selector = require './selector'
 config = require './config/config.json'
 utils = require './utils'
+logger = require './logger'
 
 module.exports = class Worker extends events.EventEmitter
   constructor:->
@@ -49,6 +50,7 @@ module.exports = class Worker extends events.EventEmitter
         self._batchQueue = self.queue_selector.get_queue()
         self.numIteration = self._batchQueue.num_iteration
 
+      logger.info "Total messages processed #{self._totalMessagesProcessed}"
       if self._incompleteMessages.length < config.worker.MAX_INCOMPLETE_MESSAGES
         self.singleLongPoll (err, data)->
           self.emit 'err' , err if err
@@ -132,7 +134,7 @@ module.exports = class Worker extends events.EventEmitter
 
 
   _onError: (e)->
-    console.log e
+    logger.error  e
 
 
 

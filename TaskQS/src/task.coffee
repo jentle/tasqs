@@ -2,6 +2,7 @@ uuid = require 'node-uuid'
 _ = require 'lodash'
 Publisher = require './publisher'
 config = require './config/config.json'
+logger = require './logger'
 
 module.exports= class Task
   maxRetries : 4
@@ -59,7 +60,10 @@ module.exports= class Task
     return Math.min 1<<retryNum * @::retryDelayMultiple , config.sqs.MAX_TASK_DELAY_SEC
 
   @handle_failure: (message, err)->
+
     allowed_retries = @::maxRetries
+
+    logger.warn "Task #{message.taskId} , #{err.message}"
 
     if not allowed_retries or allowed_retries <=0
       return true
