@@ -1,0 +1,19 @@
+{
+   "aws":{
+     "ACCESS_KEY_ID":"AKIAJD2DHJGJMZXGGEBA",
+     "SECRET_ACCESS_KEY":"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",
+     "REGION":"us-east-1"
+   },
+
+  "sqs": {
+    "TAST_SIZE_LIMI": 256000,
+    "RETRY_DELAY_MULTIPLE_SEC": 60,
+    "MAX_TASK_DELAY_SEC": 900,
+    "USED_DEAD_LETTER": true,
+    "QUEUE_CONFIG": "queue_config.yaml"
+  },
+  "crypt":{
+    "ALGORITHM":"aes-256-ctr",
+    "PASSWORD":"GJZYC2010"
+  }
+}
