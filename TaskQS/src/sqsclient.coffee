@@ -30,7 +30,6 @@ module.exports = class SQSClient
 
   _getQueue: (queue_name, cb) ->
     self = @
-
     return cb null, self._queues[queue_name] if self._queues[queue_name]
 
     async.waterfall [

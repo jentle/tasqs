@@ -1,4 +1,5 @@
 uuid = require 'node-uuid'
+path = require 'path'
 _ = require 'lodash'
 Publisher = require './publisher'
 config = require './config/config.json'
@@ -29,9 +30,10 @@ module.exports= class Task
     @_dequeuedTime = null
 
     @_dequeued null
+    logger.data "task handled in #{@_dequeuedTime - @_enqueued_time}"
 
-  @publish: (app_data, args..., cb) ->
-
+  @publish: (app_data, args..., cb=->) ->
+    @classpath = @_getClasspath module, @name
     task_id = @_get_task_id @name
     payload =
       args: args
@@ -43,27 +45,28 @@ module.exports= class Task
   @_get_task_id: ->
     return "#{ @name}-#{uuid.v1()}"
 
-
   ###*
   *
   *
   ###
-  @_getClassPath : (name)->
+  @_getClasspath : (mod, name)->
     self = @
-    mod = module
-    name = name.toLowerCase()
-    for child in mod.parent
-      return child.filename if child.filename.match("/#{name}.coffee$")
-
+    parents =[]
+    if (typeof mod.parent )== 'Array'
+      parents.push mod.parent...
+    else
+      parents.push mod.parent
+    for p in parents
+      return p.filename if (path.basename p.filename ) == name.toLowerCase()
+      for sub, obj of p.exports
+        return p.filename if sub == name
 
   @_getDelaySec: (retryNum) ->
-    return Math.min 1<<retryNum * @::retryDelayMultiple , config.sqs.MAX_TASK_DELAY_SEC
+    return Math.min (1<<retryNum )* @::retryDelayMultiple , config.sqs.MAX_TASK_DELAY_SEC
 
   @handle_failure: (message, err)->
 
     allowed_retries = @::maxRetries
-
-    logger.warn "Task #{message.taskId} , #{err.message}"
 
     if not allowed_retries or allowed_retries <=0
       return true
@@ -71,11 +74,12 @@ module.exports= class Task
     if allowed_retries <= message.retryNum
       return true
 
+    @classpath = @_getClasspath module, @name
+
     # Republish failed message if not permanent failed
     publisher = new Publisher
     {taskId, payload, retryNum } = message
     delaySec = @_getDelaySec retryNum
-
     publisher.publish @, taskId, payload, retryNum+1, delaySec
 
     return false

@@ -1,3 +1,3 @@
-AdditionTask  = require './tasks/additiontask'
+{AdditionTask}  = require './tasks/tasks'
 
 AdditionTask.publish null, 1, 2 , ->

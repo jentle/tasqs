@@ -16,19 +16,19 @@ module.exports = class QueueLoader
 
   constructor: (config_path) ->
     unless @_queues
-      @_queues = @constructor._get_configured_queues config_path
+      @_queues = @constructor._getConfiguredQueues config_path
 
     unless @_queues_map
       @_queues_map = {}
       @_queues_map[q.name] = q for q in @_queues
 
-  get_queue : (queue_name) ->
+  getQueue : (queue_name) ->
     return @_queues_map[queue_name]
 
-  get_queues: ->
+  getQueues: ->
     return @_queues
 
-  @_get_configured_queues: (file )->
+  @_getConfiguredQueues: (file )->
     try
       config_queues = yaml.safeLoad(fs.readFileSync(file, 'utf8'));
       queues =[]

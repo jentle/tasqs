@@ -1,7 +1,7 @@
 
 module.exports = class Message
 
-  constructor:( queue, body,id=null, receiptHandle=null) ->
+  constructor:( queue, body, id=null, receiptHandle=null) ->
     throw new Error 'No queue specified with message' unless queue
     @queue = queue
     @body = body

@@ -1,7 +1,7 @@
 {
    "aws":{
-     "ACCESS_KEY_ID":"AKIAJD2DHJGJMZXGGEBA",
-     "SECRET_ACCESS_KEY":"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",
+     "ACCESS_KEY_ID":"AKIAJMNBGMKO3ADOR2MQ",
+     "SECRET_ACCESS_KEY":"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",
      "REGION":"us-east-1"
    },
 
@@ -20,6 +20,6 @@
   },
   "crypt":{
     "ALGORITHM":"aes-256-ctr",
-    "PASSWORD":"GJZYC2010"
+    "PASSWORD":""
   }
 }

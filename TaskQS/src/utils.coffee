@@ -3,8 +3,10 @@ path = require 'path'
 getTimestamp = ->
   return Date.now()
 
-importClass = (class_path)->
-  return require path.resolve(__dirname, class_path)
+importClass = (className, classPath)->
+  mod =  require path.resolve(__dirname, classPath)
+  return mod if mod.name == className
+  return  mod[className]
 
 getClassPath = (file) ->
   return path.relative __dirname,file

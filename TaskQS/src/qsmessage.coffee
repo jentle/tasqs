@@ -7,11 +7,12 @@ logger = require './logger'
 
 module.exports = class QsMessage extends Message
 
-  @create_message: ( task_class, task_id, payload,
+  @create_message: ( taskClass, taskId, payload,
                     queue, current_retry_num=0) ->
     message_body =
-      id: task_id,
-      task_name:"#{getClassPath task_class.classPath}",
+      id: taskId,
+      taskPath:"#{ getClassPath taskClass.classpath}",
+      taskName: "#{taskClass.name}",
       _publisher_data: '',
       retryNum : current_retry_num,
       payload: payload,
