@@ -1,7 +1,6 @@
 events = require 'events'
 async = require 'async'
 path = require 'path'
-util = require 'util'
 
 Consumer = require './consumer'
 Publisher = require './publisher'
@@ -53,7 +52,7 @@ module.exports = class Worker extends events.EventEmitter
   run : ->
     self =@
 
-    if @_checkResourceUsage
+    if @_checkResourceUsage null
       if --self.numIteration < 0
         # Current message fetching message queue
         self._batchQueue = self.queueScheduler.getQueue()
@@ -94,7 +93,14 @@ module.exports = class Worker extends events.EventEmitter
 
 
   _checkResourceUsage: ->
-    return  true
+    memUsage =process.memoryUsage()
+
+    if memUsage.heapTotal < (config.worker.MAX_MEMORY_USAGE * 1024 * 1024)
+      return  true
+    # If exceed memory
+    return false
+    process.abort()
+
 
   _getTimeout: ->
     return 1000 * Math.abs @_batchQueue.visibility_timeout_sec - @_batchQueue.long_poll_time_sec

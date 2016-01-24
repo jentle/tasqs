@@ -1,3 +1,11 @@
-{AdditionTask}  = require './tasks/tasks'
+tasks  = require './tasks/tasks'
 
-AdditionTask.publish null, 1, 2 , ->
+setInterval ->
+  tasks.HighPriorityTask.publish null, 1, 2 , ->
+, 3000
+
+setTimeout ->
+  console.log "end"
+, 1000000
+
+

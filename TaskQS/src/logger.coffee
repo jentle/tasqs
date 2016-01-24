@@ -1,4 +1,6 @@
 winston = require 'winston'
+fs = require 'fs'
+path = require 'path'
 
 config = {
   levels: {
@@ -21,10 +23,27 @@ config = {
   }
 };
 
+logDir = path.resolve __dirname, "../logs"
+logFile = path.resolve __dirname, "../logs/TaskQS.log"
+
+dataDir = path.resolve __dirname, "../data"
+dataFile = path.resolve __dirname, "../data/TaskQS.data"
+
+if not fs.existsSync logDir
+  fs.mkdirSync logDir
+
+
+if not fs.existsSync dataDir
+  fs.mkdirSync dataDir
+
 module.exports = new (winston.Logger)({
   transports: [
     new (winston.transports.Console)({
-      colorize: true
+      colorize: true,
+    }),
+    new (winston.transports.File)({
+      filename: dataFile,
+      level:"data"
     })
   ],
   levels: config.levels,

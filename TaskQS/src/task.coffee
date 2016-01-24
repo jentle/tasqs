@@ -16,13 +16,13 @@ module.exports= class Task
   constructor: (message_body)->
     message = message_body
 
-    {id, task_name, payload, _publisher_data, retry_num, _enqueued_time} = message
+    {id, payload, _publisher_data, retryNum, _enqueued_time} = message
+
     @id = id
-    @task_name = task_name
     @payload = payload
     @_publisher_data = _publisher_data
-    @retry_num = retry_num
-    @_enqueued_time = _enqueued_time
+    @retryNum = retryNum
+    @_enqueuedTime = _enqueued_time
 
     # For Task Tracing
     @_startTime = null
@@ -30,7 +30,8 @@ module.exports= class Task
     @_dequeuedTime = null
 
     @_dequeued null
-    logger.data "task handled in #{@_dequeuedTime - @_enqueued_time}"
+
+
 
   @publish: (app_data, args..., cb=->) ->
     @classpath = @_getClasspath module, @name
@@ -106,3 +107,11 @@ module.exports= class Task
 
   _dequeued :()->
     @_dequeuedTime = Date.now null
+
+    taskMeta =
+      queue: @queue,
+      id: @id,
+      dequeuedTime: @_dequeuedTime - @_enqueuedTime,
+      currentRetry: @retryNum
+
+    logger.data taskMeta
