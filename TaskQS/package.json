@@ -1,7 +1,7 @@
 {
   "name": "TaskQS",
   "description": "Task Queue built on the Amazon SQS with Nodejs",
-  "homepage": "https://github.com/bigluck/sqs-queue-parallel",
+  "homepage": "https://github.com/jentle/tasqs/tree/master/TaskQS",
   "author": "jentle",
   "version": "0.0.1",
   "license": "MIT",
