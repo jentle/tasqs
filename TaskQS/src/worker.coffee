@@ -9,12 +9,17 @@ Scheduler = require './scheduler'
 config = require './config/config.json'
 utils = require './utils'
 logger = require './logger'
+{
+  TimeoutError
+} = require './errors'
 
 signals = [
   'SIGINT',
   'SIGQUIT',
   'SIGTERM',
 ]
+
+
 
 module.exports = class Worker extends events.EventEmitter
   constructor:->
@@ -131,9 +136,8 @@ module.exports = class Worker extends events.EventEmitter
   _onMessages: (messages) ->
     self = @
     @_incompleteMessages.push messages...
-
+    @_messagesTimeout = @_batchQueue.visibility_timeout_sec * 1000 + Date.now()
     # Current processing message queue
-    self._workingQueue = self._batchQueue
 
     async.eachSeries messages, (message, next)->
       self._runMessage message, next
@@ -145,46 +149,46 @@ module.exports = class Worker extends events.EventEmitter
       self._continueRun null
 
   _runMessage: (message, cb) ->
+     return cb new TimeoutError if @._messagesTimeout <= Date.now()
+
      self = @
-     @working_message=message
+
+     taskClass = null
      async.waterfall [
        (next) ->
          message.get_body_decoded (body)->
            next null , body
        (data, next) ->
-         task_class = utils.importClass data.taskName, data.taskPath
-         task = new task_class data
+         taskClass = utils.importClass data.taskName, data.taskPath
+         task = new taskClass data
 
-         try
-           task.launch message.args...
-           self._successfulMessages.push message
-           next null ,null
-         catch err
-           self.error_message=message
+         nextTimeout = self._messagesTimeout - Date.now()
+         nextTimeout = Math.min nextTimeout, taskClass::timeLimit
 
-           logger.error "task #{task.id} ,err #{err.message}"
-           permanent_fail = task_class.handle_failure message, err
+         # Run the task
+         task.launch message.args..., next
+     ], (err) ->
+       if  err
+         permanent_fail = taskClass.handle_failure message, err
 
-           if permanent_fail && config.sqs.USED_DEAD_LETTER
+         if permanent_fail && config.sqs.USED_DEAD_LETTER
              self._permanentMessages.push message
 
-           self._failedMessages.push message
+         self._failedMessages.push message
 
-           next null , null
-     ], (err, ret) ->
+         index = self._incompleteMessages.indexOf message
+         self._incompleteMessages.splice index, 1
+       else
+         self._successfulMessages.push message
 
-       index = self._incompleteMessages.indexOf message
-       self._incompleteMessages.splice index, 1
        self._totalMessagesProcessed +=1
-       cb arguments...
-
-
+       cb null
 
   _onPermanentFail: (message) ->
 
   _onTaskFail: (message) ->
 
-  _on_shutdown: ->
+  _onShutdown: ->
 
 
   _onError: (e)->

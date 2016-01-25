@@ -1,5 +1,7 @@
 uuid = require 'node-uuid'
 path = require 'path'
+async = require 'async'
+
 _ = require 'lodash'
 Publisher = require './publisher'
 config = require './config/config.json'
@@ -12,6 +14,9 @@ module.exports= class Task
   # Specify the queue to push , should be override in subclass
   # Should be override
   queue : null
+
+  # Task Timeout Limit in milliseconds
+  timeLimit : 60000
 
   constructor: (message_body)->
     message = message_body
@@ -85,25 +90,37 @@ module.exports= class Task
 
     return false
 
-  launch : (args...)->
-    @_checkEnv null
-    @_preRun args...
+  launch : (args..., cb)->
+    self = @
+    async.series [
+      (next)->
+        self._checkEnv next
+      (next) ->
+        self._preRun args... , next
+      (next) ->
+        try
+          self._runTask args..., next
+        catch e
+          next e
+      (next) ->
+        self._postRun args..., next
+    ], (err)->
+      logger.error "task #{self.id} failed ,err #{err.message}" if err
+      cb arguments...
 
-    try
-      @_runTask args...
-    catch  e
-      throw e
+  _checkEnv :(next)->
+    next null
 
-    @_postRun args...
-
-  _checkEnv :()->
-
-  _preRun: (args...) ->
+  _preRun: (args..., next) ->
     @_startTime = Date.now null
-  _runTask: (args...)->
+    next null
 
-  _postRun: (args...) ->
+  _runTask: (args...,next)->
+    next new Error "Not Implemented"
+
+  _postRun: (args..., next) ->
     @_endTime = Date.now null
+    next null
 
   _dequeued :()->
     @_dequeuedTime = Date.now null

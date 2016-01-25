@@ -20,7 +20,7 @@ module.exports = class Publisher extends SQSClient
         if err
           logger.err "Publish #{taskId} failed #{err.message}"
         else
-          logger.info "Successful publish #{taskId} to SQS"
+          logger.info "Successful publish #{taskId} to SQS, current retry #{retryNum}"
 
 
   ###*
