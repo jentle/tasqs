@@ -27,18 +27,9 @@ The workflow of TaskQS is quite simple. First , specify your AWS credential in t
    },
    ...
 }
-```
-Create your own task by extend the base Task. The class variable "queue" should be specified as the message queue to be published. And the "_runTask" method should be overriden. There should be whatever your task want to do.
 
-```coffeescript
-Task = require '../src/task'
 
-class AdditionTask extends Task
-  queue : "default"
 
-  _runTask:( a, b) ->
-    console.log "Addition result #{a+b}"
-    
 ```
 
 The TaskQS currently support a queue scheduling based on priority. The priority should be between 10-100. Tasks in high priority queue are not guaranteed first completion than low priority. But they
@@ -51,6 +42,19 @@ high_priority:
   visibility_timeout_sec: 60
   long_poll_time_sec: 1
   num_iterations: 10
+```
+
+Create your own task by extend the base Task. The class variable "queue" should be specified as the message queue to be published. And the "_runTask" method should be overriden. There should be whatever your task want to do.
+
+```coffeescript
+Task = require '../src/task'
+
+class AdditionTask extends Task
+  queue : "default"
+
+  _runTask:( a, b, next) ->
+     next null, a+b
+    
 ```
 
 Publish your Task to Amazon SQS
@@ -68,7 +72,10 @@ Worker = require '../src/worker'
 worker = new Worker
 worker.run null
 ```
-## Run in docker 
+## Run in docker
+
+TaskQS could run in docker container with easy configuration. The accessKey, secretId, and region is required for your AWS credential.
+
 ```
-docker run -t -i jentle/tasqs /etc/start-worker <accessKey> <secretId> [region]
+docker run -t -i jentle/tasqs /etc/start-worker <accessKey> <secretId> <region>
 ```
